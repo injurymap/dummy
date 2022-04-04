@@ -5,7 +5,9 @@ from app import schemas
 from app.decorators import validate_schema
 
 app = Flask(__name__)
-app.config["SQLALCHEMY_DATABASE_URI"] = os.environ["DATABASE_URL"]
+app.config["SQLALCHEMY_DATABASE_URI"] = os.environ["DATABASE_URL"].replace(
+    "://", "ql://", 1
+)
 db = SQLAlchemy(app)
 
 
