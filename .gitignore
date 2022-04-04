@@ -1,0 +1,57 @@
+*.py[cod]
+.env
+*.env
+!safe.env
+
+# C extensions
+*.so
+
+# Packages
+*.egg
+*.egg-info
+
+node_modules
+.cache
+build
+eggs
+parts
+var
+sdist
+develop-eggs
+.installed.cfg
+lib
+lib64
+__pycache__
+
+# Installer logs
+pip-log.txt
+
+# Unit test / coverage reports
+.coverage
+.tox
+nosetests.xml
+
+# Translations
+
+.firebase/*
+/firebase/public/
+
+# Cerfificates
+*.pem
+
+# SQLite databases and dumps
+*.sqlite
+latest.dump
+anonymous.dump
+google_auth.json
+
+# Virtual environment
+venv
+
+# Web asset
+.webassets-cache
+app/static/gen
+
+# Tmp
+tmp
+.DS_Store
