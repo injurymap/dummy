@@ -1,22 +1,25 @@
 // For format details, see https://aka.ms/devcontainer.json. For config options, see the README at:
-// https://github.com/microsoft/vscode-dev-containers/tree/v0.231.2/containers/python-3
+// https://github.com/microsoft/vscode-dev-containers/tree/v0.187.0/containers/python-3-postgres
+// Update the VARIANT arg in docker-compose.yml to pick a Python version: 3, 3.8, 3.7, 3.6 
 {
-	"name": "Python 3",
-	"build": {
-		"dockerfile": "Dockerfile",
-		"context": "..",
-		"args": {
-			// Update 'VARIANT' to pick a Python version: 3, 3.10, 3.9, 3.8, 3.7, 3.6
-			// Append -bullseye or -buster to pin to an OS version.
-			// Use -bullseye variants on local on arm64/Apple Silicon.
-			"VARIANT": "3.8",
-			// Options
-			"NODE_VERSION": "none"
-		}
-	},
+	"name": "Python 3 & PostgreSQL",
+	"dockerComposeFile": "docker-compose.yml",
+	"service": "app",
+	"workspaceFolder": "/workspace",
 	// Set *default* container specific settings.json values on container create.
 	"settings": {
-		"python.defaultInterpreterPath": "/usr/local/bin/python",
+		"sqltools.connections": [
+			{
+				"name": "Container database",
+				"driver": "PostgreSQL",
+				"previewLimit": 50,
+				"server": "localhost",
+				"port": 5432,
+				"database": "postgres",
+				"username": "postgres",
+				"password": "postgres"
+			}
+		],
 		"python.linting.enabled": true,
 		"python.linting.pylintEnabled": true,
 		"python.formatting.autopep8Path": "/usr/local/py-utils/bin/autopep8",
@@ -32,12 +35,17 @@
 	// Add the IDs of extensions you want installed when the container is created.
 	"extensions": [
 		"ms-python.python",
-		"ms-python.vscode-pylance"
+		"ms-python.vscode-pylance",
+		"mtxr.sqltools",
+		"mtxr.sqltools-driver-pg"
 	],
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
-	// "forwardPorts": [],
+	"forwardPorts": [
+		// 8000,
+		5432
+	],
 	// Use 'postCreateCommand' to run commands after the container is created.
-	"postCreateCommand": "pip install pipenv; pipenv install --dev --system",
-	// Comment out to connect as root instead. More info: https://aka.ms/vscode-remote/containers/non-root.
+	"postCreateCommand": "pip install pipenv; pipenv install --dev --system; npm install -g pyright@1.1.99",
+	// Comment out connect as root instead. More info: https://aka.ms/vscode-remote/containers/non-root.
 	"remoteUser": "root"
 }

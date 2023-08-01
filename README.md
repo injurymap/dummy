@@ -1,15 +1,18 @@
-### Docker
-Install Docker app
+# Project Initialization
 
-Open VS code:
-Install the `Remote - Containers` extension.
+The project should be run in VS Code Dev Container. (Ctrl + Shift + P > Reopen Folder in Dev Container)
 
-Enter `cmd+shift+p` -> `Remote-Containers: Open Folder In Container` -> select `dummy` folder.
+1. Create local database with:
 
-VS Code will setup the Dev Container.
+```
+su - postgres
+createdb postgres
+```
 
-Run code with `flask run`
+2. Initialize DB scheme:
 
-### Deploy updates
+```
+flask db upgrade
+```
 
-Any commit to the master branch will be deployed to Heroku and accessible via: https://pacific-ocean-61984.herokuapp.com/
+3. Run application from VS Code "Run and Debug" tab - "Python: Flask"

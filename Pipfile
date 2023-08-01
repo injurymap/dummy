@@ -4,15 +4,18 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
+alembic = "*"
 flask = "*"
-pydantic = "*"
 flask-sqlalchemy = "*"
+Flask-SQLAlchemy = "*"
 gunicorn = "*"
 python-dotenv = "*"
 pyhumps = "*"
 psycopg2-binary = "*"
+flask-migrate = "*"
+pydantic = "==1.9"
 
 [dev-packages]
 
 [requires]
-python_version = "3.9"
+python_version = "3.10"

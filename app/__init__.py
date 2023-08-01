@@ -1,6 +1,7 @@
 import os
 from flask import Flask, jsonify
 from flask_sqlalchemy import SQLAlchemy
+from flask_migrate import Migrate
 from app import schemas
 from app.decorators import validate_schema
 
@@ -8,7 +9,10 @@ app = Flask(__name__)
 app.config["SQLALCHEMY_DATABASE_URI"] = os.environ["DATABASE_URL"].replace(
     "://", "ql://", 1
 )
+app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 db = SQLAlchemy(app)
+
+migrate = Migrate(app, db)
 
 
 class User(db.Model):
