@@ -2,7 +2,7 @@
 
 The project should be run in VS Code Dev Container. (Ctrl + Shift + P > Reopen Folder in Dev Container)
 
-1. Create local database with:
+1. Create local database with (run inside the Postgres docker container) if does not exist:
 
 ```
 su - postgres
