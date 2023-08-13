@@ -19,10 +19,12 @@ migrate = Migrate(app, db)
 login_manager = flask_login.LoginManager()
 login_manager.init_app(app)
 
+
 class User(db.Model):
     __tablename__ = "users"
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
+    api_key = db.Column(db.String(124))
 
     def __repr__(self):
         return "<User %r>" % self.username
@@ -57,7 +59,8 @@ def load_user_from_request(request):
         if user:
             return user
 
-    return None    
+    return None
+
 
 def is_authenticated():
     try:
@@ -83,7 +86,7 @@ def check(booking_form: schemas.BookAppointment):
 def get_bookings():
     if is_authenticated() is False:
         return jsonify({"message": "unauthorized"}), 401
-    
+
     args = request.args
     pg_id = args.get("pg_id")
     booking_time = args.get("booking_time")
@@ -97,7 +100,25 @@ def get_bookings():
 
     filtered_bookings = query.all()
 
-    return filtered_bookings
+    user_bookings = []
+    for booking in filtered_bookings:
+        pg = PaymentGuarantee.query.filter_by(id=booking.pg_id).first()
+        if pg.user_id == flask_login.current_user.id:
+            user_bookings.append(booking)
+
+    resp = {
+        "bookings": [
+            {
+                "id": booking.id,
+                "pg_id": booking.pg_id,
+                "booking_time": booking.booking_time,
+                "creation_time": booking.creation_time
+            } for booking in user_bookings
+        ]
+    }
+    
+
+    return jsonify(resp), 200
 
 
 @app.route("/booking", methods=["POST"])
@@ -105,11 +126,17 @@ def get_bookings():
 def create_booking(booking_form: schemas.Booking):
     if is_authenticated() is False:
         return jsonify({"message": "unauthorized"}), 401
-    
+
     id = booking_form.id
     pg_id = booking_form.pg_id
     booking_time = datetime.fromisoformat(booking_form.booking_time)
     creation_time = datetime.utcnow()
+
+    pg = PaymentGuarantee.query.filter_by(id=pg_id).first()
+    user = User.query.filter_by(id=pg.user_id).first()
+
+    if flask_login.current_user != user:
+        return jsonify({"message": "forbidden"}, 403)
 
     new_booking = Bookings(id=id, pg_id=pg_id, booking_time=booking_time, creation_time=creation_time)
     db.session.add(new_booking)
