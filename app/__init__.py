@@ -51,3 +51,16 @@ def check(booking_form: schemas.BookAppointment):
     pg = PaymentGuarantee.query.filter_by(email=booking_form.email).all()
     print(pg)
     return jsonify({"existing_payment_guarantees": len(pg)})
+
+
+@app.route("/booking", methods=["GET"])
+def get_bookings():
+    
+    return None
+
+
+@app.route("/booking", methods=["POST"])
+@validate_schema
+def create_booking():
+
+    return None
