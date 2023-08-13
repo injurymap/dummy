@@ -61,6 +61,6 @@ def get_bookings():
 
 @app.route("/booking", methods=["POST"])
 @validate_schema
-def create_booking():
+def create_booking(booking_form: schemas.Booking):
 
     return None
