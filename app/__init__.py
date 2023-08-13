@@ -6,6 +6,7 @@ from flask_migrate import Migrate
 from app import schemas
 from app.decorators import validate_schema
 from datetime import datetime
+import logging
 
 app = Flask(__name__)
 app.config["SQLALCHEMY_DATABASE_URI"] = os.environ["DATABASE_URL"].replace(
@@ -63,14 +64,16 @@ def load_user_from_request(request):
 
 
 def is_authenticated():
+    logging.info("Check whether user is authenticated.")
     try:
         if flask_login.current_user.is_authenticated is False:
+            logging.info("The user is not authenticated, proceeding with AnonymousUser.")
             return False
 
     # If the user is authenticated, then it is not an AnonymousUser and therefore
     # it does not have the `is_authenticated` attribute.
     except AttributeError:
-        pass
+        logging.info("The user authenticated, ID : %s.", flask_login.current_user.id)
 
 
 @app.route("/", methods=["POST"])
@@ -84,12 +87,16 @@ def check(booking_form: schemas.BookAppointment):
 
 @app.route("/booking", methods=["GET"])
 def get_bookings():
+    logging.info("Received GET request against endpoint '/booking'.")
+    
     if is_authenticated() is False:
         return jsonify({"message": "unauthorized"}), 401
 
     args = request.args
     pg_id = args.get("pg_id")
     booking_time = args.get("booking_time")
+
+    logging.info("Attributes provided, pg_id: %s, booking_time: %s.", pg_id, booking_time)
 
     query = Bookings.query
     if pg_id is not None:
@@ -117,6 +124,7 @@ def get_bookings():
         ]
     }
     
+    logging.info("Response for user %s: %s.", pg.user_id, resp)
 
     return jsonify(resp), 200
 
@@ -124,6 +132,8 @@ def get_bookings():
 @app.route("/booking", methods=["POST"])
 @validate_schema
 def create_booking(booking_form: schemas.Booking):
+    logging.info("Received POST request against endpoint '/booking'.")
+
     if is_authenticated() is False:
         return jsonify({"message": "unauthorized"}), 401
 
@@ -132,14 +142,19 @@ def create_booking(booking_form: schemas.Booking):
     booking_time = datetime.fromisoformat(booking_form.booking_time)
     creation_time = datetime.utcnow()
 
+    logging.info("Received following form for booking creation, id: %s, pg_id: %s, booking_time: %s",id, pg_id, booking_time)
+
     pg = PaymentGuarantee.query.filter_by(id=pg_id).first()
     user = User.query.filter_by(id=pg.user_id).first()
 
     if flask_login.current_user != user:
+        logging.info("User: %s cannot book the booking covered by PG: %s", flask_login.current_user.id, pg.id)
         return jsonify({"message": "forbidden"}, 403)
 
     new_booking = Bookings(id=id, pg_id=pg_id, booking_time=booking_time, creation_time=creation_time)
     db.session.add(new_booking)
     db.session.commit()
+
+    logging.info("User: %s created booking: %s using the PG: %s", user.id, new_booking.id, pg.id)
 
     return jsonify({"message": "booking created successfully"}), 201
