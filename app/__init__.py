@@ -36,6 +36,14 @@ class PaymentGuarantee(db.Model):
     email = db.Column(db.String(124))
 
 
+class Bookings(db.Model):
+    __tablename__ = "bookings"
+    id = db.Column(db.Integer, primary_key=True)
+    pg_id = db.Column(db.Integer, db.ForeignKey("payment_guarantees.id"), index=True)
+    booking_time = db.Column(db.DateTime)
+    creation_time = db.Column(db.DateTime)
+
+
 @app.route("/", methods=["POST"])
 @validate_schema
 def check(booking_form: schemas.BookAppointment):
