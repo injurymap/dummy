@@ -4,6 +4,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from app import schemas
 from app.decorators import validate_schema
+from datetime import datetime
 
 app = Flask(__name__)
 app.config["SQLALCHEMY_DATABASE_URI"] = os.environ["DATABASE_URL"].replace(
@@ -62,5 +63,13 @@ def get_bookings():
 @app.route("/booking", methods=["POST"])
 @validate_schema
 def create_booking(booking_form: schemas.Booking):
+    id = booking_form.id
+    pg_id = booking_form.pg_id
+    booking_time = datetime.fromisoformat(booking_form.booking_time)
+    creation_time = datetime.utcnow()
 
-    return None
+    new_booking = Bookings(id=id, pg_id=pg_id, booking_time=booking_time, creation_time=creation_time)
+    db.session.add(new_booking)
+    db.session.commit()
+
+    return jsonify({"message": "booking created successfully"}), 201
