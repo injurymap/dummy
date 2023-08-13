@@ -1,4 +1,5 @@
 import os
+import flask_login
 from flask import Flask, jsonify, request
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
@@ -15,6 +16,8 @@ db = SQLAlchemy(app)
 
 migrate = Migrate(app, db)
 
+login_manager = flask_login.LoginManager()
+login_manager.init_app(app)
 
 class User(db.Model):
     __tablename__ = "users"
@@ -45,6 +48,28 @@ class Bookings(db.Model):
     creation_time = db.Column(db.DateTime)
 
 
+@login_manager.request_loader
+def load_user_from_request(request):
+    api_key = request.headers.get('Authorization')
+    if api_key:
+        api_key = api_key.replace('Bearer ', '', 1)
+        user = User.query.filter_by(api_key=api_key).first()
+        if user:
+            return user
+
+    return None    
+
+def is_authenticated():
+    try:
+        if flask_login.current_user.is_authenticated is False:
+            return False
+
+    # If the user is authenticated, then it is not an AnonymousUser and therefore
+    # it does not have the `is_authenticated` attribute.
+    except AttributeError:
+        pass
+
+
 @app.route("/", methods=["POST"])
 @validate_schema
 def check(booking_form: schemas.BookAppointment):
@@ -56,6 +81,9 @@ def check(booking_form: schemas.BookAppointment):
 
 @app.route("/booking", methods=["GET"])
 def get_bookings():
+    if is_authenticated() is False:
+        return jsonify({"message": "unauthorized"}), 401
+    
     args = request.args
     pg_id = args.get("pg_id")
     booking_time = args.get("booking_time")
@@ -75,6 +103,9 @@ def get_bookings():
 @app.route("/booking", methods=["POST"])
 @validate_schema
 def create_booking(booking_form: schemas.Booking):
+    if is_authenticated() is False:
+        return jsonify({"message": "unauthorized"}), 401
+    
     id = booking_form.id
     pg_id = booking_form.pg_id
     booking_time = datetime.fromisoformat(booking_form.booking_time)

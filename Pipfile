@@ -14,6 +14,7 @@ pyhumps = "*"
 psycopg2-binary = "*"
 flask-migrate = "*"
 pydantic = "==1.9"
+flask-login = "*"
 
 [dev-packages]
 
