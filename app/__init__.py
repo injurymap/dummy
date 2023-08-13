@@ -1,5 +1,5 @@
 import os
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from app import schemas
@@ -56,8 +56,20 @@ def check(booking_form: schemas.BookAppointment):
 
 @app.route("/booking", methods=["GET"])
 def get_bookings():
-    
-    return None
+    args = request.args
+    pg_id = args.get("pg_id")
+    booking_time = args.get("booking_time")
+
+    query = Bookings.query
+    if pg_id is not None:
+        query = query.filter_by(pg_id=pg_id)
+    if booking_time is not None:
+        booking_time = datetime.fromisoformat(booking_time)
+        query = query.filter_by(booking_time=booking_time)
+
+    filtered_bookings = query.all()
+
+    return filtered_bookings
 
 
 @app.route("/booking", methods=["POST"])
