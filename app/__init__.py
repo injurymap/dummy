@@ -35,6 +35,35 @@ class PaymentGuarantee(db.Model):
     cell_phone_number = db.Column(db.String(124))
     email = db.Column(db.String(124))
 
+class EventLog(injurymapModel):
+    __tablename__ = "event_logs"
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"), index=True)
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow, index=True)
+    param = db.Column(db.String(64), index=True)
+    value = db.Column(db.Text())
+
+    user = db.relationship("User", back_populates="event_logs")
+    user_query = db.relationship(
+        "User",
+        back_populates="event_logs_query",
+        uselist=True,
+        viewonly=True,
+    )
+
+    @staticmethod
+    def log(user_id, param, value=None):
+        if isinstance(value, dict):
+            value = json.dumps(value)
+        if isinstance(user_id, list):
+            for u_id in user_id:
+                log = EventLog(user_id=u_id, param=param, value=value)
+                db.session.add(log)
+        else:
+            log = EventLog(user_id=user_id, param=param, value=value)
+            db.session.add(log)
+        db.session.commit()
+
 
 @app.route("/", methods=["POST"])
 @validate_schema
