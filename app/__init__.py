@@ -4,6 +4,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from app import schemas
 from app.decorators import validate_schema
+from datetime import datetime
 
 app = Flask(__name__)
 app.config["SQLALCHEMY_DATABASE_URI"] = os.environ["DATABASE_URL"].replace(
@@ -35,7 +36,7 @@ class PaymentGuarantee(db.Model):
     cell_phone_number = db.Column(db.String(124))
     email = db.Column(db.String(124))
 
-class EventLog(injurymapModel):
+class EventLog(db.Model):
     __tablename__ = "event_logs"
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey("users.id"), index=True)
