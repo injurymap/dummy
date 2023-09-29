@@ -29,3 +29,8 @@ class BookAppointment(CamelModel):
     last_name: Optional[str]
     cell_phone_number: Optional[str]
     email: Optional[str]
+
+class Booking(CamelModel):
+    id: str
+    pg_id: Optional[str]
+    booking_time: Optional[str]
